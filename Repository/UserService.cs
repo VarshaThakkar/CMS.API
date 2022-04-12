@@ -27,9 +27,9 @@ namespace Vaan.CMS.API.Repository
         }
         public void Register(UserRegister model)
         {
-            if (_context.Users.Any(x => x.UserName == model.UserName))
-            {
-                throw new AppException("UserName " + model.UserName + " is already taken");
+            if (_context.Users.Any(x => x.Email == model.Email))
+            {  
+                throw new AppException("Email " + model.Email + " is already taken");
             }
 
             // map model to user object
@@ -42,64 +42,56 @@ namespace Vaan.CMS.API.Repository
             _context.Users.Add(user);
             _context.SaveChanges();
         }
-
         public LoginResponse Authenticate(LoginRequest model)
         {
-            var user = _context.Users.SingleOrDefault(x => x.UserName == model.UserName);
-            if (user == null || !BCryptNet.Verify(model.Password, user.Password))
+            var user = _context.Users.FirstOrDefault(x => x.Email == model.Email);
+
+            if (user == null || !BCryptNet.Verify(model.Password,user.Password))
             {
-                throw new AppException("Username or password is incorrect");
+                throw new AppException("Email or password is incorrect");
 
             }
             else
             {
-                var query = (from x in _context.Users
-                             where x.UserName == model.UserName
-                             select new { x.Status }).SingleOrDefault();
-                if (query != null)
+                if (user.Status == false)
                 {
-                    bool userstatus = query.Status;
-                    if (userstatus == false)
-                    {
-                        throw new AppException("User status is deactivated");
-                    }
+                    throw new AppException("User status is deactivated");
                 }
                 var response = _mapper.Map<LoginResponse>(user);
                 response.Token = _jwtUtils.GenrateToken(user);
                 return response;
             }
         }
-
         public IEnumerable<User> GetAll()
         {
             return _context.Users;
         }
-
         public User GetById(int id)
         {
             return getUser(id);
         }
 
         // helper methods
-
         private User getUser(int id)
         {
             var user = _context.Users.Find(id);
             if (user == null) throw new KeyNotFoundException("User not found");
             return user;
         }
-
         public void Update(int id, UpdateRequest model)
         {
             var user = getUser(id);
-            if (model.UserName != user.UserName && _context.Users.Any(x => x.UserName == model.UserName))
+            if (model.Email != user.Email && _context.Users.Any(x => x.Email == model.Email))
             {
-                throw new AppException("Username '" + model.UserName + "' already taken");
+                throw new AppException("Email '" + model.Email + "' already taken");
             }
             if (!string.IsNullOrEmpty(model.Password))
-            {
-                user.Password = BCryptNet.HashPassword(model.Password);
+            {   
                 _mapper.Map(model, user);
+
+                //hash password
+                user.Password = BCryptNet.HashPassword(model.Password);
+
                 _context.Users.Update(user);
                 _context.SaveChanges();
 
@@ -111,6 +103,18 @@ namespace Vaan.CMS.API.Repository
             var user = getUser(id);
             _context.Users.Remove(user);
             _context.SaveChanges();
+        }
+
+        public void ChangePassword(int id, ChangePasswordRequest model)
+        {
+            var user = getUser(id);
+            if (!string.IsNullOrEmpty(model.Password))
+            {
+                user.Password = BCryptNet.HashPassword(model.Password);
+                _mapper.Map(model, user);
+                _context.Users.Update(user);
+                _context.SaveChanges();
+            }
         }
     }
 }

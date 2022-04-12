@@ -39,7 +39,7 @@ namespace Vaan.CMS.API.Migrations
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
 
-                    b.Property<string>("UserName")
+                    b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");

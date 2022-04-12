@@ -13,7 +13,7 @@ namespace Vaan.CMS.API.Models.Users
         [Required]
         public string LastName { get; set; }
         [Required]
-        public string UserName { get; set; }
+        public string Email { get; set; }
         [Required]
         public bool Status { get; set; }
         [Required]

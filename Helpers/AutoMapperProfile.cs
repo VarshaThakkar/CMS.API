@@ -30,6 +30,19 @@ namespace Vaan.CMS.API.Helpers
                         return true;
                     }
                 ));
+
+            // ChangePasswordRequest -> User
+            CreateMap<ChangePasswordRequest, User>()
+                .ForAllMembers(x => x.Condition(
+                    (src, dest, prop) =>
+                    {
+                        // ignore null & empty string properties
+                        if (prop == null) return false;
+                        if (prop.GetType() == typeof(string) && string.IsNullOrEmpty((string)prop)) return false;
+
+                        return true;
+                    }
+                ));
         }
        
     }

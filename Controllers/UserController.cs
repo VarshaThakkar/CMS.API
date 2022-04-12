@@ -27,7 +27,7 @@ namespace Vaan.CMS.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("register")]       
+        [HttpPost("register")]
         public IActionResult Register(UserRegister model)
         {
             _userService.Register(model);
@@ -55,7 +55,7 @@ namespace Vaan.CMS.API.Controllers
             return Ok(user);
         }
         [HttpPut("{id}")]
-      //  [HttpPut("Update-User")]
+        //  [HttpPut("Update-User")]
         public IActionResult Update(int id, UpdateRequest model)
         {
             _userService.Update(id, model);
@@ -67,6 +67,14 @@ namespace Vaan.CMS.API.Controllers
             _userService.Delete(id);
             return Ok(new { message = "User deleted successfully" });
         }
+        [HttpPut("ChangePassword/{id}")]
+       
+        public IActionResult ChangePassword(int id, ChangePasswordRequest model)
+        {
+            _userService.ChangePassword(id, model);
+            return Ok(new { message = "Password has been changed successfully" });
+        }
+       
 
     }
 }

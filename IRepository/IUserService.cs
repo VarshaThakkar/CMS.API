@@ -14,6 +14,7 @@ namespace Vaan.CMS.API.IRepository
         IEnumerable<User> GetAll();
         User GetById(int id);
         void Update(int id,UpdateRequest model);
+        void ChangePassword(int id,ChangePasswordRequest model);
         void Delete(int id);
     }
 }

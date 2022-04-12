@@ -1,0 +1,10 @@
+replace username to email
+remove throwng exception
+implement ilogger with all exception message
+add info like mesaage
+front end login with external google and facebook
+password not required
+oauth
+
+
+
