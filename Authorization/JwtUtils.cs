@@ -14,7 +14,7 @@ namespace Vaan.CMS.API.Authorization
 
     public interface IJwtUtils
     {
-        string GenrateToken(User user);
+        string GenrateToken(UserEntity user);
         int? ValidateToken(string token);
     }
     public class JwtUtils : IJwtUtils
@@ -24,21 +24,21 @@ namespace Vaan.CMS.API.Authorization
         {
             _configuration = configuration;
         }
-        public string GenrateToken(User user)
+
+        public string GenrateToken(UserEntity user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
+                Subject = new ClaimsIdentity(new[] {new Claim("Id", user.Id.ToString())}),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
-
         public int? ValidateToken(string token)
         {
             if (token == null)
@@ -52,14 +52,14 @@ namespace Vaan.CMS.API.Authorization
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
                     // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
                     ClockSkew = TimeSpan.Zero
                 }, out SecurityToken validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
-                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "Id").Value);
 
                 // return user id from JWT token if validation successful
                 return userId;

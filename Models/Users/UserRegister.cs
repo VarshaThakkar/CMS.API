@@ -8,15 +8,15 @@ namespace Vaan.CMS.API.Models.Users
 {
     public class UserRegister
     {
-        [Required]
+        [Required(ErrorMessage = "This field is required!")]
         public string FirstName { get; set; }
-        [Required]
+        [Required(ErrorMessage = "This field is required!")]
         public string LastName { get; set; }
-        [Required]
+        [Required(ErrorMessage = "This field is required!")]
         public string Email { get; set; }
-        [Required]
+        [Required(ErrorMessage = "This field is required!")]
         public bool Status { get; set; }
-        [Required]
+       // [Required]
         public string Password { get; set; }
     }
 }

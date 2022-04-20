@@ -13,13 +13,13 @@ namespace Vaan.CMS.API.Helpers
         public AutoMapperProfile()
         {
             // UserRegister -> User
-            CreateMap<UserRegister, User>();
+            CreateMap<UserRegister, UserEntity>();
 
             // User -> LoginResponse
-            CreateMap<User, LoginResponse>();
+            CreateMap<UserEntity, LoginResponse>();
 
             // UpdateRequest -> User
-            CreateMap<UpdateRequest, User>()
+            CreateMap<UpdateRequest, UserEntity>()
                 .ForAllMembers(x => x.Condition(
                     (src, dest, prop) =>
                     {
@@ -32,7 +32,7 @@ namespace Vaan.CMS.API.Helpers
                 ));
 
             // ChangePasswordRequest -> User
-            CreateMap<ChangePasswordRequest, User>()
+            CreateMap<ChangePasswordRequest, UserEntity>()
                 .ForAllMembers(x => x.Condition(
                     (src, dest, prop) =>
                     {

@@ -1,25 +1,20 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Vaan.CMS.API.Data;
-using Microsoft.EntityFrameworkCore;
-using Vaan.CMS.API.IRepository;
-using Vaan.CMS.API.Repository;
-using Vaan.CMS.API.Authorization;
-using Vaan.CMS.API.Helpers;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
+using Vaan.CMS.API.Authorization;
+using Vaan.CMS.API.Data;
+using Vaan.CMS.API.Helpers;
+using Vaan.CMS.API.IRepository;
+using Vaan.CMS.API.Mapping;
+using Vaan.CMS.API.Repository;
 
 namespace Vaan.CMS.API
 {
@@ -42,30 +37,30 @@ namespace Vaan.CMS.API
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(o =>
+                x.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
             {
-                var Key = Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]);
-                o.SaveToken = true;
-                o.TokenValidationParameters = new TokenValidationParameters
+
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = Configuration["Jwt:Issuer"],
-                    ValidAudience = Configuration["Jwt:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Key)
+                    IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.ASCII.GetBytes(
+                    Configuration.GetSection("Jwt:key").Value)),
+                    ValidateLifetime = true,
+                    ValidateAudience = false,
+                    ValidateIssuer = false
+
                 };
+
             });
 
             services.AddDbContext<CMSDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("CMSConnectionStrings")));
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-           
+            // services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
             services.AddScoped<IJwtUtils, JwtUtils>();
-            services.AddTransient<IUserService, UserService>();
+            services.AddTransient<IUserServices, UserServices>();
+            services.AddAutoMapper(typeof(UserMapping));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Vaan.CMS.API", Version = "v1" });
@@ -85,6 +80,7 @@ namespace Vaan.CMS.API
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            //  app.UseCookiePolicy(); app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
             app.UseAuthentication();
 
             app.UseAuthorization();
@@ -92,8 +88,8 @@ namespace Vaan.CMS.API
             app.UseMiddleware<ErrorHandlerMiddleware>();
 
             // custom jwt auth middleware
-           //app.UseMiddleware<JwtMiddleware>();
-           
+            //app.UseMiddleware<JwtMiddleware>();
+
 
             app.UseEndpoints(endpoints =>
             {

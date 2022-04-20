@@ -22,18 +22,18 @@ namespace Vaan.CMS.API.Authorization
             _configuration = configuration;
         }
 
-        public async Task Invoke(HttpContext context, IUserService userService, IJwtUtils jwtUtils)
+        public async Task Invoke(HttpContext context, IUserServices userServices, IJwtUtils jwtUtils)
         {
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             var userId = jwtUtils.ValidateToken(token);
             if (userId != null)
             {
                 // attach user to context on successful jwt validation
-                context.Items["User"] = userService.GetById(userId.Value);
+                context.Items["User"] = userServices.GetById(userId.Value);
             }
 
             await _next(context);
         }
-       
+
     }
 }

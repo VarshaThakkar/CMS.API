@@ -14,6 +14,7 @@ namespace Vaan.CMS.API.Data
         {
 
         }
-        public DbSet<User> Users { get; set; }
+       // public DbSet<User> Users { get; set; }
+        public DbSet<UserEntity> CMSUsers { get; set; }
     }
 }
