@@ -15,8 +15,9 @@ namespace Vaan.CMS.API.Helpers
             // UserRegister -> User
             CreateMap<UserRegister, UserEntity>();
 
-            // User -> LoginResponse
+            // User -> LoginResponse           
             CreateMap<UserEntity, LoginResponse>();
+            CreateMap<LoginRequest, UserEntity>();
 
             // UpdateRequest -> User
             CreateMap<UpdateRequest, UserEntity>()

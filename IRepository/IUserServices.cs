@@ -17,5 +17,6 @@ namespace Vaan.CMS.API.IRepository
         Task<UserEntity> UpdateUser(UserEntity user);
         Task DeleteUser(int id);
         UserEntity GetById(int id);
+       
     }
 }

@@ -53,7 +53,6 @@ namespace Vaan.CMS.API.Repository
             await _cMSDbContext.SaveChangesAsync();
             return user;
         }
-
         public bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
             using (var hmac = new HMACSHA512(passwordSalt))
@@ -90,7 +89,7 @@ namespace Vaan.CMS.API.Repository
         public UserEntity GetById(int id)
         {
             return getUser(id);
-        }
+        }        
         public async Task DeleteUser(int id)
         {
             var userToDelete = getUser(id);

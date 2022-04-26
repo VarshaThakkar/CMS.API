@@ -47,6 +47,19 @@ namespace Vaan.CMS.API.Controllers
             }
             return Ok(userToRetrieve);
         }
+
+        //[AllowAnonymous]
+        //[HttpGet("GetByEmail/{email}")]
+        //public async Task<ActionResult<UserEntity>> GetByEmail(string email)
+        //{
+        //    var userToRetrieve = await _cMSDbContext.CMSUsers.FindAsync(email);
+        //    if (userToRetrieve == null)
+        //    {
+        //        return NotFound("Couldn't find such a user");
+        //    }
+        //    return Ok(userToRetrieve);
+        //}
+
         [AllowAnonymous]
         [HttpPost("register")]
         public async Task<ActionResult<UserEntity>> RegisterUser([FromBody] UserRegister user)
@@ -73,6 +86,7 @@ namespace Vaan.CMS.API.Controllers
             }
             return Ok(user);
         }
+
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser([FromBody] LoginRequest user)
@@ -97,8 +111,8 @@ namespace Vaan.CMS.API.Controllers
             }
             return Unauthorized();
         }
-        [HttpPatch("{id}")]
 
+        [HttpPatch("{id}")]
         public async Task<ActionResult<UserEntity>> UpdateUser(UserEntity user, int id)
         {
             var userToDUpdate = _cMSDbContext.CMSUsers.FirstOrDefault(x => x.Id == id);
@@ -136,6 +150,25 @@ namespace Vaan.CMS.API.Controllers
             _cMSDbContext.SaveChanges();
             return NoContent();
 
+        }
+
+        [AllowAnonymous]
+        [HttpPost("googlelogin")]
+        public async Task<ActionResult<UserEntity>> GoogleUserRegister(UserRegister user)
+        {
+            if (await _userServices.IsUniqueUser(user.Email))
+            {
+                var userToRetrieve = await _cMSDbContext.CMSUsers.FirstOrDefaultAsync(u => u.Email == user.Email);
+                var token = _userServices.Login(userToRetrieve);
+                return Ok(token);
+            }
+            else
+            {
+                var usertologin = await _userServices.Register(new UserEntity { Email = user.Email, FirstName = user.FirstName, LastName = user.LastName });
+                var token = _userServices.Login(usertologin);
+                return Ok(token);
+            }
+            // return Unauthorized();
         }
     }
 }

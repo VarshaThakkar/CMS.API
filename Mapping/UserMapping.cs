@@ -13,6 +13,7 @@ namespace Vaan.CMS.API.Mapping
         public UserMapping()
         {
             CreateMap<UserEntity, UserRegister>().ReverseMap();
+
         }
     }
 }
