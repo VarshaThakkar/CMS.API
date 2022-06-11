@@ -12,6 +12,7 @@ using Vaan.CMS.API.Authorization;
 using Vaan.CMS.API.Data;
 using Vaan.CMS.API.Entities;
 using Vaan.CMS.API.IRepository;
+using Vaan.CMS.API.Models.Users;
 
 namespace Vaan.CMS.API.Repository
 {
@@ -41,11 +42,11 @@ namespace Vaan.CMS.API.Repository
         {
             return await _cMSDbContext.CMSUsers.AnyAsync(u => u.Email == email);
         }
-        public string Login(UserEntity user)
+        public LoginResponse Login(UserEntity model)
         {
-            //string key = _jwtUtils.GenrateToken(user);
+            var user = _cMSDbContext.CMSUsers.SingleOrDefault(x => x.Email == model.Email);
             string token = _jwtUtils.GenrateToken(user);
-            return token;
+            return new LoginResponse(user, token);
         }
         public async Task<UserEntity> Register(UserEntity user)
         {
@@ -62,25 +63,7 @@ namespace Vaan.CMS.API.Repository
             }
         }
 
-        public string CreateToken(UserEntity user)
-        {
-            List<Claim> claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name , user.Email)
-            };
-            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
-                _configuration.GetSection("Jwt:key").Value));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-            var token = new JwtSecurityToken(
-                claims: claims,
-                expires: DateTime.Now.AddDays(1),
-                signingCredentials: creds
-
-                );
-            string jwt = new JwtSecurityTokenHandler().WriteToken(token);
-            return jwt;
-        }
-        public async Task<UserEntity> UpdateUser(UserEntity user)
+        public async Task<UserEntity> UpdateUser(UserEntity user, int id)
         {
             _cMSDbContext.CMSUsers.Update(user);
             await _cMSDbContext.SaveChangesAsync();
@@ -89,7 +72,7 @@ namespace Vaan.CMS.API.Repository
         public UserEntity GetById(int id)
         {
             return getUser(id);
-        }        
+        }
         public async Task DeleteUser(int id)
         {
             var userToDelete = getUser(id);

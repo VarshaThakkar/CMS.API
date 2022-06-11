@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System;
 using System.Text;
 using Vaan.CMS.API.Authorization;
 using Vaan.CMS.API.Data;
@@ -30,33 +30,20 @@ namespace Vaan.CMS.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+             .AddMicrosoftIdentityWebApi(options =>
+             {
+                 Configuration.Bind("AzureAdB2C", options);
+
+                 options.TokenValidationParameters.NameClaimType = "name";
+             },
+            options => { Configuration.Bind("AzureAdB2C", options); });
+
 
             services.AddControllers();
 
-            services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options =>
-            {
-
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.ASCII.GetBytes(
-                    Configuration.GetSection("Jwt:key").Value)),
-                    ValidateLifetime = true,
-                    ValidateAudience = false,
-                    ValidateIssuer = false
-
-                };
-
-            });
 
             services.AddDbContext<CMSDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("CMSConnectionStrings")));
-            // services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
 
             services.AddScoped<IJwtUtils, JwtUtils>();
             services.AddTransient<IUserServices, UserServices>();
@@ -84,11 +71,12 @@ namespace Vaan.CMS.API
             app.UseAuthentication();
 
             app.UseAuthorization();
+
             // global error handler
             app.UseMiddleware<ErrorHandlerMiddleware>();
 
             // custom jwt auth middleware
-            //app.UseMiddleware<JwtMiddleware>();
+            // app.UseMiddleware<JwtMiddleware>();
 
 
             app.UseEndpoints(endpoints =>

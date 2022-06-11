@@ -21,7 +21,7 @@ namespace Vaan.CMS.API.Authorization
                 return;
 
             // authorization
-            var user = (UserEntity)context.HttpContext.Items["User"];
+            var user = (UserEntity)context.HttpContext.Items["UserEntity"];
             if (user == null)
                 context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
         }
